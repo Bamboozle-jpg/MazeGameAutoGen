@@ -4,10 +4,12 @@
 #include <unistd.h>
 #include "mazegen.h"
 
-int* initialize_maze(int rows, int cols);
-void display_maze(int* maze, int rows, int cols);
 
+void display_maze(int* maze, int rows, int cols);
 int* create_maze(int rows, int cols);
+int* break_walls(int* maze, int holes, int rows, int cols);
+
+int* initialize_maze(int rows, int cols);
 void dfs_recursive(int* maze, int current, int rows, int cols);
 
 int check_square(int* maze, int current, int translation, int rows, int cols);
@@ -125,3 +127,29 @@ int choose_dir(float weights[4]) {
 	if (choice < (weights[0]+weights[1]+weights[2]+weights[3])*100) return 3;
 	return 0;
 }
+
+int* break_walls(int* maze, int holes,  int rows, int cols) {
+
+	srand(time(NULL));
+
+	int created  = 0;
+
+	while (created < holes) {
+		int randRow = (rand() % (rows/2 - 1)) * 2 + 1;
+		int randCol = (rand() % (cols/2 - 1)) * 2 + 1;
+		
+		// either clears right or clears down
+		int goRight = rand() % 2;
+		int square = randRow*cols + randCol;
+		if (goRight && maze[square+1] == 1) {
+			maze[square+1] = 0;
+			created++;
+		} else if (!goRight && maze[square+cols] == 1) {
+			maze[square+cols] = 0;
+			created++;
+		}
+	}
+	return maze;
+}
+
+

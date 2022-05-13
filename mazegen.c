@@ -17,6 +17,8 @@ int choose_dir(float weights[4]);
 
 int* create_maze(int rows, int cols) {
 
+	srand(time(NULL));
+
 	// empty squares are 0s
 	int *maze = initialize_maze(rows, cols);
 

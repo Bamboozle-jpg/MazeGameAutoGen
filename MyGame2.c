@@ -1,5 +1,5 @@
 //Lol get ncurses
-//COMPILE THIS PROGRAM USING gcc -Wall MyGame2.c mazegen.c -o MyGame2 -lncurses
+//COMPILE THIS PROGRAM USING gcc -Wall MyGame2.c mazegen.c -o MyGame2.out -lncurses
 //DA DOCUMENTATION : https://linux.die.net/man/3/keypad  ,  https://linux.die.net/man/3/mvwprintw , https://www.mkssoftware.com/docs/man3/curs_clear.3.asp ,
 //Most of these are just for me, the important one is ncurses
 #include <stdio.h>

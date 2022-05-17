@@ -1,2 +1,5 @@
 # output files
 *.out
+
+#swp files (in case I forget (how) to exit VIM)
+*.swp

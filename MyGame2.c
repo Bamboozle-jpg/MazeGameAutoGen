@@ -61,10 +61,10 @@ void print_menu(WINDOW *menu_win, int highlight);
 void print_menu_speed(WINDOW *menu_win);
 
 int main() {
-	end = 0;
-  	//Creates the Window
-  	WINDOW *menu_win;
-	// Sets up Var for which thing to highlight?
+
+  //Creates the Window
+  WINDOW *menu_win;
+  // Sets up Var for which thing to highlight?
 	int highlight = 1;
 	int choice = 0;
 	int c;
@@ -114,6 +114,8 @@ int main() {
 
 	//menu
 	while(choice == 4) {
+		wclear(menu_win);
+		refresh();
 		choice = 4;
 		while(1)
 		{	c = wgetch(menu_win);
@@ -271,11 +273,6 @@ int main() {
 					}
 				}
 
-				if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
-					end = 1;
-					printGameState(menu_win, highlight, q, maze, choice);
-				}
-
 				c = wgetch(menu_win);
 				shot1X = -4;
 				shot1Y = -4;
@@ -372,16 +369,15 @@ int main() {
 					enemy2Y = -100;
 					cool2 = ENEMCOOL;
 				}
-			}
-	
-			printGameState(menu_win, highlight, q, maze, choice);
-			msleep(gamespeed);
+	    }
 
 			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
 				choice = 4;
-				printGameState(menu_win, highlight, q, maze, choice);
 			}
-		}
+
+			printGameState(menu_win, highlight, q, maze, choice);
+	    	msleep(gamespeed);
+	  }
 	}
 
 	//out of loop
@@ -480,6 +476,7 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 		while(closed == 0) {
 			c = wgetch(menu_win);
 			switch(c) {
+				// ENTER
 				case 10:
 					closed = 1;
 					break;
@@ -490,6 +487,7 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 	// wattroff(menu_win, A_REVERSE);
 	//refreshes the window, I think this does the same as refresh
 	wrefresh(menu_win);
+	clear();
 }
 
 

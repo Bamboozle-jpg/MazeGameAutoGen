@@ -1,5 +1,5 @@
 //Lol get ncurses
-//COMPILE THIS PROGRAM USING gcc -Wall MyGame2.c mazegen.c -o MyGame2 -lncurses
+//COMPILE THIS PROGRAM USING gcc -Wall MyGame2.c mazegen.c -o MyGame2.out -lncurses
 //DA DOCUMENTATION : https://linux.die.net/man/3/keypad  ,  https://linux.die.net/man/3/mvwprintw , https://www.mkssoftware.com/docs/man3/curs_clear.3.asp ,
 //Most of these are just for me, the important one is ncurses
 #include <stdio.h>
@@ -505,80 +505,120 @@ int msleep(long msec) {
 //Given a location and sends out a new location of the enemy
 //Returns 0 for up, 1 for left, 2 for down, 3 for right
 int enemyMove(int board[BOARDY][BOARDX], int posX, int posY, int dirMoved) {
-  //Given an initial movement that it just took, chooses which way to turn and what that means
-  switch (dirMoved) {
-    //Moved up
-    case 0:
-      //Attempts to turn right
-      if (board[posY][posX+1] == 0) {
-        return 3;
-      //attempts to keep going
-    } else if (board[posY-1][posX] == 0) {
-        return 0;
-      //attempts to turn left
-    } else if (board[posY][posX-1] == 0) {
-        return 1;
-      //otherwise turns around
-      } else {
-        return 2;
-      }
-      break;
+	//Given an initial movement that it just took, chooses which way to turn and what that means
+	
+	enum directions{UP,LEFT,DOWN,RIGHT};
+	
+	// chance of turning in each direction
+	int turnChance = 25;
+	// Clock of prime number thing
+	//   2
+	// 3 X 7
+	//   5
+	// Multiplies each number where empty space
 
-    //Moved left
-    case 1:
-      //Attempts to turn right
-      if (board[posY-1][posX] == 0) {
-        return 0;
-      //attempts to keep going
-    } else if (board[posY][posX-1] == 0) {
-        return 1;
-      //attempts to turn left
-    } else if (board[posY+1][posX] == 0) {
-        return 2;
-      //otherwise turns around
-      } else {
-        return 3;
-      }
-      break;
+	int clock = 1;
+	// up
+	if (board[posY-1][posX] == 0) clock *= 2;
+	// left 
+	if (board[posY][posX-1] == 0) clock *= 3;
+	// down
+	if (board[posY+1][posX] == 0) clock *= 5;
+	// right
+	if (board[posY][posX+1] == 0) clock *= 7;
 
-    //moved down
-    case 2:
-      //Attempts to turn right
-      if (board[posY][posX-1] == 0) {
-        return 1;
-      //attempts to keep going
-    } else if (board[posY+1][posX] == 0) {
-        return 2;
-      //attempts to turn left
-    } else if (board[posY][posX+1] == 0) {
-        return 3;
-      //otherwise turns around
-      } else {
-        return 0;
-      }
-      break;
+	switch (dirMoved) {
 
-    //moved right
-    case 3:
-      //Attempts to turn right
-      if (board[posY+1][posX] == 0) {
-        return 2;
-      //attempts to keep going
-      } else if (board[posY][posX+1] == 0) {
-        return 3;
-      //attempts to turn left
-      } else if (board[posY-1][posX] == 0) {
-        return 0;
-      //otherwise turns around
-      } else {
-        return 1;
-      }
-      break;
-  }gamespeed = 200;
+		case UP:
+			// empty in front
+			if (clock % 2 == 0) {
+				int num = rand() % 100;
+				// chance to move left
+				if (clock % 3 == 0 && num < turnChance) return LEFT;
+				// chance to move right
+				if (clock % 7 == 0 && num > (turnChance-1) && num < 2*turnChance) return RIGHT;
+				// otherwise continue forward
+				return UP;
+			} else {
+				// both right and left empty
+				if (clock % 21 == 0) {
+					int num = rand() % 2;
+					if (num == 0) return LEFT;
+					return RIGHT;
+				}
+				if (clock % 3 == 0) return LEFT;
+				if (clock % 7 == 0) return RIGHT;
+				return DOWN;
+			}
+		case LEFT:
+			// empty in front 
+			if (clock % 3 == 0) {
+				int num = rand() % 100;
+				// chance to move up
+				if (clock % 2 == 0 && num < turnChance) return UP;
+				// chance to move down
+				if (clock % 5 == 0 && num > (turnChance-1) && num < 2*turnChance) return DOWN;
+				// otherwise continue left
+				return LEFT;
+			} else {
+				// both up and down empty
+				if (clock % 10 == 0) {
+					int num = rand() % 2;
+					if (num == 0) return UP;
+					return DOWN;
+				}
+				if (clock % 2 == 0) return UP;
+				if (clock % 5 == 0) return DOWN;
+				return RIGHT;
+			}
+		case DOWN:
+			// empty in front
+			if (clock % 5 == 0) {
+				int num = rand() % 100;
+				// chance to move left
+				if (clock % 3 == 0 && num < turnChance) return LEFT;
+				// chance to move right
+				if (clock % 7 == 0 && num > (turnChance-1) && num < 2*turnChance) return RIGHT;
+				// otherwise continue forward
+				return DOWN;
+			} else {
+				// both right and left empty
+				if (clock % 21 == 0) {
+					int num = rand() % 2;
+					if (num == 0) return LEFT;
+					return RIGHT;
+				}
+				if (clock % 3 == 0) return LEFT;
+				if (clock % 7 == 0) return RIGHT;
+				return UP;
+			}
+		case RIGHT:
+			// empty in front 
+			if (clock % 7 == 0) {
+				int num = rand() % 100;
+				// chance to move up
+				if (clock % 2 == 0 && num < turnChance) return UP;
+				// chance to move down
+				if (clock % 5 == 0 && num > (turnChance-1) && num < 2*turnChance) return DOWN;
+				// otherwise continue left
+				return RIGHT;
+			} else {
+				// both up and down empty
+				if (clock % 10 == 0) {
+					int num = rand() % 2;
+					if (num == 0) return UP;
+					return DOWN;
+				}
+				if (clock % 2 == 0) return UP;
+				if (clock % 5 == 0) return DOWN;
+				return LEFT;
+			}
+	}
 
-  //Just in case something fails, default case for if nothing happens.
-  printf("Uh oh, there was an error");
-  return 0;
+	gamespeed = 200;
+	//Just in case something fails, default case for if nothing happens.
+	printf("Uh oh, there was an error");
+	return 0;
 }
 
 void createEnemy(int gen) {

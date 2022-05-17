@@ -41,9 +41,9 @@ int highlight = 1;
 
 //Array for menu
 char *choices[] = {
-			"Play Game",
-			"Change speed",
-			"Exit",
+			"Play Game      ",
+			"Change speed   ",
+			"Exit           ",
 		  };
 //N choices is an integer representing the number of choices the player has
 int n_choices = sizeof(choices) / sizeof(char *);
@@ -75,6 +75,7 @@ int main() {
 	int cols = BOARDX;
 
 	int* mazeTemp = create_maze(rows, cols);
+	mazeTemp = break_walls(mazeTemp, 10, rows, cols);
 	int maze[BOARDY][BOARDX];
 	for (int i = 0; i < BOARDY; i++) {
 		for (int j = 0; j < BOARDX; j++) {
@@ -104,7 +105,7 @@ int main() {
   //Makes it so any key presses are gotten and read through the window
 	keypad(menu_win, TRUE);
   //prints out the line at the coordinates (static location.... I think) (use wprintw for something that can be scrolled I think)
-	mvprintw(0, 0, "Arrow Keys up and down to navigate, enter to select. While playing, arrow keys to move, A and D to swing sword left and right");
+	mvprintw(0, 0, "Arrow Keys up and down to navigate, enter to select. While playing, arrow keys to move, WASD to swing sword");
   //Takes everything that's been told to be printed and puts it on the screen
 	refresh();
   //Set up for future proof
@@ -147,7 +148,7 @@ int main() {
 
 		//Re-randomizes maze
 		int* mazeTemp = create_maze(rows, cols);
-		int maze[BOARDY][BOARDX];
+		mazeTemp = break_walls(mazeTemp, 20, rows, cols);
 		for (int i = 0; i < BOARDY; i++) {
 			for (int j = 0; j < BOARDX; j++) {
 				maze[i][j] = mazeTemp[i*BOARDY + j];
@@ -327,6 +328,32 @@ int main() {
 							}
 						}
 						break;
+					case 'w':
+						if (sCool == 0) {
+							sCool = SCOOL;
+							if(maze[playerY-1][playerX] == 0) {
+								shot1Y = playerY-1;
+								shot1X = playerX;
+								if(maze[playerY-2][playerX] == 0) {
+									shot2Y = playerY-2;
+									shot2X = playerX;
+								}
+							}
+						}
+						break;
+					case 's':
+						if (sCool == 0) {
+							sCool = SCOOL;
+							if(maze[playerY+1][playerX] == 0) {
+								shot1Y = playerY+1;
+								shot1X = playerX;
+								if(maze[playerY+2][playerX] == 0) {
+									shot2Y = playerY+2;
+									shot2X = playerX;
+								}
+							}
+						}
+						break;
 					default:
 						break;
 				}
@@ -378,25 +405,35 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 			//prints a row
 			for (int j = 0; j < BOARDX; j++) {
 				if ((i == ENEMGENY && j == ENEMGENX) || (i == ENEMGENTY && j == ENEMGENTX)) {
-					        if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X)) {
-					        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[M ");
-					        } else if (i == playerY && j == playerX) {
-					        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[G ");
-					        } else {
-					        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[  ");
-					        }
+				        if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X)) {
+				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[M ");
+				        } else if (i == playerY && j == playerX) {
+				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[G ");
+				        } else {
+				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[  ");
+				        }
 	      			} else if (playerY == i && playerX == j) {
 				        //prints you (the gamer)
 				        mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, " G ");
 				} else if (shot1Y == i && shot1X == j) {
 				        //prints beginning of sword
-				        mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "=[=");
+					if (shot2X > playerX) {
+				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "=[=");
+					} else if (shot2X < playerX) {
+				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "=]=");
+					} else {
+						mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "| |");
+					}
 				} else if (shot2Y == i && shot2X == j) {
-								//prints the end of sword
+					//prints the end of sword
 				        if (shot2X > playerX) {
 				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "==>");
 					} else if (shot2X < playerX) {
 				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "<==");
+					} else if (shot2Y > playerY) {
+						mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " | ");
+					} else {
+						mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " | ");
 					}
 				} else if(enemy1Y == i && enemy1X == j) {
 				        //prints monster
@@ -417,7 +454,7 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 			} else {
 				mvwprintw(menu_win, OFFSETY+BOARDY+1, OFFSETX, "Sword Almost ready, Cooldown %d", sCool);
 			}
-			mvwprintw(menu_win, OFFSETY+BOARDY+1, OFFSETX, "Score : %d ", score);
+			mvwprintw(menu_win, OFFSETY+BOARDY, OFFSETX, "Score : %d ", score);
 		}
 	} else {
 		for (int i = 0; i < 7; i++) {

@@ -12,16 +12,16 @@
 #include "mazegen.h"
 
 //Sets Width of Window
-#define WIDTH 60
+#define WIDTH 75
 //Sets Height of Window
-#define HEIGHT 20
+#define HEIGHT 25
 
 #define ENEMGENX 1
 #define ENEMGENY 10
 #define ENEMGENTX 8
 #define ENEMGENTY 10
-#define BOARDX 15
-#define BOARDY 15
+#define BOARDX 19
+#define BOARDY 19
 
 #define OFFSETX 8
 #define OFFSETY 2
@@ -98,8 +98,8 @@ int main() {
 	//THIS IS THE IMPORTANT ONE
 	halfdelay(1);	/* Line buffering disabled. pass on everything */
   	//Centers it in the screen
-	startx = (80 - WIDTH) / 2;
-	starty = (24 - HEIGHT) / 2;
+	startx = 20;
+	starty = 4;
   	//Sets up the window with a height, width, and centers it
 	menu_win = newwin(HEIGHT, WIDTH, starty, startx);
   	//Makes it so any key presses are gotten and read through the window
@@ -377,6 +377,20 @@ int main() {
 				}
 			}
 
+			if ((shot1X == enemy1X && shot1Y == enemy1Y) || (shot2X == enemy1X && shot2Y == enemy1Y)) {
+				score++;
+				enemy1X = -100;
+				enemy1Y = -100;
+				cool1 = ENEMCOOL;
+			}
+
+			if ((shot1X == enemy2X && shot1Y == enemy2Y) || (shot2X == enemy2X && shot2Y == enemy2Y)) {
+				score++;
+				enemy2X = -100;
+				enemy2Y = -100;
+				cool2 = ENEMCOOL;
+			}
+
 			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
 				choice = 4;
 			}
@@ -467,6 +481,7 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 
 	} else {
 
+		wclear(menu_win);
 		for (int i = 0; i < 7; i++) {
 			mvwprintw(menu_win, OFFSETY+i, OFFSETX, "                                             ");
 		}

@@ -3,13 +3,14 @@
 
 int main() {
 
-	int rows = 15;
-	int cols = 21;
+	int rows = 31;
+	int cols = 41;
+	float horiSkew = 0.1;
 
-	int* maze = create_maze(rows, cols);
-	display_maze(maze, rows, cols);
+	int* maze = create_maze(rows, cols, horiSkew);
+	// display_maze(maze, rows, cols);
 
-	maze = break_walls(maze, 10, rows, cols);
+	maze = break_walls(maze, 50, rows, cols);
 	display_maze(maze, rows, cols);
 	return 0;
 }

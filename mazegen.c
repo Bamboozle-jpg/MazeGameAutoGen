@@ -6,18 +6,18 @@
 
 
 void display_maze(int* maze, int rows, int cols);
-int* create_maze(int rows, int cols);
+int* create_maze(int rows, int cols, float horiSkew);
 int* break_walls(int* maze, int holes, int rows, int cols);
 
 int* initialize_maze(int rows, int cols);
-void dfs_recursive(int* maze, int current, int rows, int cols);
+void dfs_recursive(int* maze, int current, int rows, int cols, float horiSkew);
 
 int check_square(int* maze, int current, int translation, int rows, int cols);
 int check_neighbors(int* maze, int current, int rows, int cols);
-int choose_dir(float weights[4]);
+int choose_dir(float horiSkew);
 
-
-int* create_maze(int rows, int cols) {
+// horiSkew determines how much the maze goes left-right (0 == All up and down, 1 == All left and right)
+int* create_maze(int rows, int cols, float horiSkew) {
 
 	srand(time(NULL));
 
@@ -33,13 +33,13 @@ int* create_maze(int rows, int cols) {
 	// sets the start of the maze to an empty square
 	maze[start] = 0;
 
-	dfs_recursive(maze, start, rows, cols);
+	dfs_recursive(maze, start, rows, cols, horiSkew);
 	
 	return maze;
 }
 
 // loops to create path through maze
-void dfs_recursive(int* maze, int current, int rows, int cols) {
+void dfs_recursive(int* maze, int current, int rows, int cols, float horiSkew) {
 
 	// offsets for each direction
 	int translations[4] = {-1, 1, cols, -cols};
@@ -49,11 +49,9 @@ void dfs_recursive(int* maze, int current, int rows, int cols) {
 	if (!check_neighbors(maze, current, rows, cols)) return;
 	
 	while (check_neighbors(maze, current, rows, cols)) {
-		// relative weights for each direction, adds up to 1
-		float weights[4] = {0.25, 0.25, 0.25, 0.25};
 		
 		// chooses direction to go in
-		int dir = choose_dir(weights);
+		int dir = choose_dir(horiSkew);
 	
 		int trans = translations[dir];
 
@@ -65,7 +63,7 @@ void dfs_recursive(int* maze, int current, int rows, int cols) {
 		maze[current+trans*2] = 0;
 
 		// calls itself again
-		dfs_recursive(maze, current+trans*2, rows, cols);
+		dfs_recursive(maze, current+trans*2, rows, cols, horiSkew);
 	}
 }
 
@@ -117,15 +115,21 @@ void display_maze(int *maze, int rows, int cols) {
 	}
 }
 
-int choose_dir(float weights[4]) {
+int choose_dir(float horiSkew) {
 
 	float choice = (float)(rand() % 100);
 
-	if (choice < weights[0]*100) return 0;
-	if (choice < (weights[0]+weights[1])*100) return 1;
-	if (choice < (weights[0]+weights[1]+weights[2])*100) return 2;
-	if (choice < (weights[0]+weights[1]+weights[2]+weights[3])*100) return 3;
-	return 0;
+	enum directions{LEFT, RIGHT, DOWN, UP};
+
+	if (choice < horiSkew*100) {
+		// randomly chose between left and right
+		if (rand() % 2) return LEFT;
+		return RIGHT;
+	}  else {
+		// randomly choose between up and down
+		if (rand() % 2) return DOWN;
+		return UP;
+	}
 }
 
 int* break_walls(int* maze, int holes,  int rows, int cols) {

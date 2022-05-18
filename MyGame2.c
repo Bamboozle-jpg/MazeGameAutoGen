@@ -33,6 +33,7 @@ char c;
 int startx = 0;
 int starty = 0;
 int gamespeed = 200;
+float horiSkew = 0.50;
 int highlight = 1;
 
 typedef struct enemySpawn {
@@ -77,7 +78,7 @@ int main() {
 	int rows = BOARDY;
 	int cols = BOARDX;
 
-	int* mazeTemp = create_maze(rows, cols);
+	int* mazeTemp = create_maze(rows, cols, horiSkew);
 	mazeTemp = break_walls(mazeTemp, 10, rows, cols);
 	int maze[rows][cols];
 	for (int i = 0; i < rows; i++) {
@@ -155,7 +156,7 @@ int main() {
 		if(choice == 1) {
 
 			//Re-randomizes maze
-			int* mazeTemp = create_maze(rows, cols);
+			int* mazeTemp = create_maze(rows, cols, horiSkew);
 			mazeTemp = break_walls(mazeTemp, 20, rows, cols);
 			for (int i = 0; i < BOARDY; i++) {
 				for (int j = 0; j < BOARDX; j++) {
@@ -337,7 +338,7 @@ int main() {
 
 			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
 				choice = 4;
-				printGameState(menu_win, highlight, q, maze, choice);
+				printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2);
 	    		msleep(gamespeed);
 			}
 

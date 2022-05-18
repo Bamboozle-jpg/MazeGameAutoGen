@@ -16,10 +16,6 @@
 //Sets Height of Window
 #define HEIGHT 20
 
-#define ENEMGENX 1
-#define ENEMGENY 10
-#define ENEMGENTX 8
-#define ENEMGENTY 10
 #define BOARDX 15
 #define BOARDY 15
 
@@ -39,6 +35,11 @@ int starty = 0;
 int gamespeed = 200;
 int highlight = 1;
 
+typedef struct enemySpawn {
+	int x;
+	int y;
+} EnemySpawn;
+
 //Array for menu
 char *choices[] = {
 	"Play Game      ",
@@ -48,13 +49,15 @@ char *choices[] = {
 //N choices is an integer representing the number of choices the player has
 int n_choices = sizeof(choices) / sizeof(char *);
 //Sets up the function gcc -Wall MyGame2.c mazegen.c -o MyGame2 -lncursesthat prints it
-void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose);
+void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose, EnemySpawn spawner1, EnemySpawn spawner2);
 //Sleep function, I think this should work
 int msleep(long msec);
 //Move enemies
 int enemyMove(int board[BOARDY][BOARDX], int posX, int posY, int dirMoved);
+// Creates a spawner for the enemy
+EnemySpawn generateSpawner(int* maze, int left, int rows, int cols);
 //Make sure there's always an enemy
-void createEnemy(int gen);
+void createEnemy(int enemy, EnemySpawn spawner);
 //Print the menu
 void print_menu(WINDOW *menu_win, int highlight);
 //Print the speed menu
@@ -76,12 +79,15 @@ int main() {
 
 	int* mazeTemp = create_maze(rows, cols);
 	mazeTemp = break_walls(mazeTemp, 10, rows, cols);
-	int maze[BOARDY][BOARDX];
-	for (int i = 0; i < BOARDY; i++) {
-		for (int j = 0; j < BOARDX; j++) {
-			maze[i][j] = mazeTemp[i*BOARDY + j];
+	int maze[rows][cols];
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			maze[i][j] = mazeTemp[i*cols + j];
 		}
 	}
+
+	EnemySpawn spawner1 = generateSpawner(*maze, 1, rows, cols);
+	EnemySpawn spawner2 = generateSpawner(*maze, 0, rows, cols);
 
 	sCool = 0;
 
@@ -165,8 +171,8 @@ int main() {
 			cool1 = -1;
 			cool2 = -1;
 			//Creates the enemies
-			createEnemy(1);
-			createEnemy(2);
+			createEnemy(1, spawner1);
+			createEnemy(2, spawner2);
 			//Sets the direction of the enemies
 			move1 = 3;
 			move2 = 3;
@@ -217,8 +223,7 @@ int main() {
 			}
 
 			if (cool1 == 0) {
-				enemy1X = ENEMGENX;
-				enemy1Y = ENEMGENY;
+				createEnemy(1, spawner1);
 				move1 = 3;
 				cool1--;
 			} else {
@@ -226,8 +231,7 @@ int main() {
 			}
 
 			if (cool2 == 0) {
-				enemy2X = ENEMGENTX;
-				enemy2Y = ENEMGENTY;
+				createEnemy(2, spawner2);
 				move2 = 3;
 				cool2--;
 			} else {
@@ -375,7 +379,7 @@ int main() {
 				choice = 4;
 			}
 
-			printGameState(menu_win, highlight, q, maze, choice);
+			printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2);
 	    	msleep(gamespeed);
 	  }
 	}
@@ -393,7 +397,7 @@ int main() {
 
 
 //Takes in a window (I'd call it a structure), which thing's highlighted, and q which keeps going up to prove that it will keep going when a key isn't pressed
-void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose) {
+void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose, EnemySpawn spawner1, EnemySpawn spawner2) {
 	//setup
 	//where to print it
 	//
@@ -405,17 +409,25 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 		for(int i = 0; i < BOARDY; i++) {
 			//prints a row
 			for (int j = 0; j < BOARDX; j++) {
-				if ((i == ENEMGENY && j == ENEMGENX) || (i == ENEMGENTY && j == ENEMGENTX)) {
-				        if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X)) {
-				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[M ");
-				        } else if (i == playerY && j == playerX) {
-				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[G ");
-				        } else {
-				        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[  ");
-				        }
-	      			} else if (playerY == i && playerX == j) {
-				        //prints you (the gamer)
-				        mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, " G ");
+				if (i == spawner1.y && j == spawner1.x) {
+				    if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X)) {
+				    	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[M ");
+			        } else if (i == playerY && j == playerX) {
+			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[G ");
+			        } else {
+			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[  ");
+			        }
+	      		} else if (i == spawner2.y && j == spawner2.x) {
+				    if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X)) {
+				    	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " M]");
+			        } else if (i == playerY && j == playerX) {
+			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " G]");
+			        } else {
+			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "  ]");
+			        }
+	      		} else if (playerY == i && playerX == j) {
+				    //prints you (the gamer)
+				    mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, " G ");
 				} else if (shot1Y == i && shot1X == j) {
 				    //prints beginning of sword
 					if (shot2X > playerX) {
@@ -634,15 +646,32 @@ int enemyMove(int board[BOARDY][BOARDX], int posX, int posY, int dirMoved) {
 	return 0;
 }
 
-void createEnemy(int gen) {
-	if (gen == 1) {
-    	enemy1X = ENEMGENX;
-    	enemy1Y = ENEMGENY;
-  	}
-  	if (gen == 2) {
-    	enemy2X = ENEMGENTX;
-    	enemy2Y = ENEMGENTY;
-  	}
+// Creates spawner for enemies
+// Left signifies if the spawner is on left or right side (1 for left, 0 for right)
+EnemySpawn generateSpawner(int* maze, int left, int rows, int cols) {
+
+	EnemySpawn spawner;
+
+	if (left == 1) {
+		spawner.x = 1;
+		spawner.y = rows-2;
+		return spawner;
+	} else {
+		spawner.x = cols-2;
+		spawner.y = 1;
+		return spawner;
+	}
+}
+
+void createEnemy(int enemy, EnemySpawn spawner) {
+
+	if (enemy == 1) {
+		enemy1X = spawner.x;
+		enemy1Y = spawner.y;
+	} else {
+		enemy2X = spawner.x;
+		enemy2Y = spawner.y;
+	}
 }
 
 void print_menu(WINDOW *menu_win, int highlight) {

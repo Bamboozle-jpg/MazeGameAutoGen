@@ -234,7 +234,110 @@ int main() {
 				cool2--;
 			}
 
-			if (enemy1X != -1) {
+			c = wgetch(menu_win);
+			shot1X = -4;
+			shot1Y = -4;
+			shot2X = -4;
+			shot2Y = -4;
+			switch(c) {
+				//moves the highlight depending on what's pressed
+				case KEY_UP:
+					if(maze[playerY-1][playerX] == 0) {
+						playerY--;
+					}
+					break;
+				case KEY_DOWN:
+					if(maze[playerY+1][playerX] == 0) {
+						playerY++;
+					}
+					break;
+				case KEY_RIGHT:
+					if(maze[playerY][playerX+1] == 0) {
+						playerX++;
+					}
+					break;
+				case KEY_LEFT:
+					if(maze[playerY][playerX-1] == 0) {
+						playerX--;
+					}
+					break;
+				case 'd':
+					if (sCool == 0) {
+						sCool = SCOOL;
+						if(maze[playerY][playerX+1] == 0) {
+							shot1Y = playerY;
+							shot1X = playerX+1;
+							if(maze[playerY][playerX+2] == 0) {
+								shot2Y = playerY;
+								shot2X = playerX+2;
+							}
+						}
+					}
+					break;
+				case 'a':
+					if (sCool == 0) {
+						sCool = SCOOL;
+						if(maze[playerY][playerX-1] == 0) {
+							shot1Y = playerY;
+							shot1X = playerX-1;
+							if(maze[playerY][playerX-2] == 0) {
+								shot2Y = playerY;
+								shot2X = playerX-2;
+							}
+						}
+					}
+					break;
+				case 'w':
+					if (sCool == 0) {
+						sCool = SCOOL;
+						if(maze[playerY-1][playerX] == 0) {
+							shot1Y = playerY-1;
+							shot1X = playerX;
+							if(maze[playerY-2][playerX] == 0) {
+								shot2Y = playerY-2;
+								shot2X = playerX;
+							}
+						}
+					}
+					break;
+				case 's':
+					if (sCool == 0) {
+						sCool = SCOOL;
+						if(maze[playerY+1][playerX] == 0) {
+							shot1Y = playerY+1;
+							shot1X = playerX;
+							if(maze[playerY+2][playerX] == 0) {
+								shot2Y = playerY+2;
+								shot2X = playerX;
+							}
+						}
+					}
+					break;
+				default:
+					break;
+			}
+
+			if ((shot1X == enemy1X && shot1Y == enemy1Y) || (shot2X == enemy1X && shot2Y == enemy1Y)) {
+				score++;
+				enemy1X = -100;
+				enemy1Y = -100;
+				cool1 = ENEMCOOL;
+			}
+
+			if ((shot1X == enemy2X && shot1Y == enemy2Y) || (shot2X == enemy2X && shot2Y == enemy2Y)) {
+				score++;
+				enemy2X = -100;
+				enemy2Y = -100;
+				cool2 = ENEMCOOL;
+			}
+
+			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
+				choice = 4;
+				printGameState(menu_win, highlight, q, maze, choice);
+	    		msleep(gamespeed);
+			}
+
+						if (enemy1X != -1) {
 				move1 = enemyMove(maze, enemy1X, enemy1Y, move1);
 				switch (move1) {
 					case 0:
@@ -252,10 +355,11 @@ int main() {
 					default:
 						break;
 				}
+			}
 
-				if (enemy2X != -1) {
-					move2 = enemyMove(maze, enemy2X, enemy2Y, move2);
-					switch (move2) {
+			if (enemy2X != -1) {
+				move2 = enemyMove(maze, enemy2X, enemy2Y, move2);
+				switch (move2) {
 					case 0:
 						enemy2Y--;
 						break;
@@ -270,106 +374,8 @@ int main() {
 						break;
 					default:
 						break;
-					}
 				}
-
-				c = wgetch(menu_win);
-				shot1X = -4;
-				shot1Y = -4;
-				shot2X = -4;
-				shot2Y = -4;
-				switch(c) {
-					//moves the highlight depending on what's pressed
-					case KEY_UP:
-						if(maze[playerY-1][playerX] == 0) {
-							playerY--;
-						}
-						break;
-					case KEY_DOWN:
-						if(maze[playerY+1][playerX] == 0) {
-							playerY++;
-						}
-						break;
-					case KEY_RIGHT:
-						if(maze[playerY][playerX+1] == 0) {
-							playerX++;
-						}
-						break;
-					case KEY_LEFT:
-						if(maze[playerY][playerX-1] == 0) {
-							playerX--;
-						}
-						break;
-					case 'd':
-						if (sCool == 0) {
-							sCool = SCOOL;
-							if(maze[playerY][playerX+1] == 0) {
-								shot1Y = playerY;
-								shot1X = playerX+1;
-								if(maze[playerY][playerX+2] == 0) {
-									shot2Y = playerY;
-									shot2X = playerX+2;
-								}
-							}
-						}
-						break;
-					case 'a':
-						if (sCool == 0) {
-							sCool = SCOOL;
-							if(maze[playerY][playerX-1] == 0) {
-								shot1Y = playerY;
-								shot1X = playerX-1;
-								if(maze[playerY][playerX-2] == 0) {
-									shot2Y = playerY;
-									shot2X = playerX-2;
-								}
-							}
-						}
-						break;
-					case 'w':
-						if (sCool == 0) {
-							sCool = SCOOL;
-							if(maze[playerY-1][playerX] == 0) {
-								shot1Y = playerY-1;
-								shot1X = playerX;
-								if(maze[playerY-2][playerX] == 0) {
-									shot2Y = playerY-2;
-									shot2X = playerX;
-								}
-							}
-						}
-						break;
-					case 's':
-						if (sCool == 0) {
-							sCool = SCOOL;
-							if(maze[playerY+1][playerX] == 0) {
-								shot1Y = playerY+1;
-								shot1X = playerX;
-								if(maze[playerY+2][playerX] == 0) {
-									shot2Y = playerY+2;
-									shot2X = playerX;
-								}
-							}
-						}
-						break;
-					default:
-						break;
-				}
-
-				if ((shot1X == enemy1X && shot1Y == enemy1Y) || (shot2X == enemy1X && shot2Y == enemy1Y)) {
-					score++;
-					enemy1X = -100;
-					enemy1Y = -100;
-					cool1 = ENEMCOOL;
-				}
-
-				if ((shot1X == enemy2X && shot1Y == enemy2Y) || (shot2X == enemy2X && shot2Y == enemy2Y)) {
-					score++;
-					enemy2X = -100;
-					enemy2Y = -100;
-					cool2 = ENEMCOOL;
-				}
-	    }
+			}
 
 			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
 				choice = 4;

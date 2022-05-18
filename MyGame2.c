@@ -27,7 +27,7 @@
 #define ENEMCOOL 5
 
 //enemy1/2,X/Y are coords of enemys, sCool, cool1, and cool2 are sword and enemy respawn cooldowns, choice is for menu, end is game end, shot1/2, X/Y are sword sprite locations, move1/2 are enemy AI
-int enemy1X, enemy1Y, playerX, playerY, move1, move2, enemy2X, enemy2Y, shot1X, shot1Y, shot2X, shot2Y, score, sCool, cool1, cool2, end, choice;
+int enemy1X, enemy1Y, playerX, playerY, move1, move2, move3, enemy2X, enemy2Y, enemy3X, enemy3Y, shot1X, shot1Y, shot2X, shot2Y, score, sCool, cool1, cool2, cool3, end, choice;
 char c;
 //Setup for later when it centers the window in the screen
 int startx = 0;
@@ -49,13 +49,13 @@ char *choices[] = {
 //N choices is an integer representing the number of choices the player has
 int n_choices = sizeof(choices) / sizeof(char *);
 //Sets up the function gcc -Wall MyGame2.c mazegen.c -o MyGame2 -lncursesthat prints it
-void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose, EnemySpawn spawner1, EnemySpawn spawner2);
+void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose, EnemySpawn spawner1, EnemySpawn spawner2, EnemySpawn spawner3);
 //Sleep function, I think this should work
 int msleep(long msec);
 //Move enemies
 int enemyMove(int board[BOARDY][BOARDX], int posX, int posY, int dirMoved);
-// Creates a spawner for the enemy
-EnemySpawn generateSpawner(int* maze, int left, int rows, int cols);
+// Creates a spawner for the enemy (1 = left, 0 = right, 2 = bottom right)
+EnemySpawn generateSpawner(int* maze, int dir, int rows, int cols);
 //Make sure there's always an enemy
 void createEnemy(int enemy, EnemySpawn spawner);
 //Print the menu
@@ -88,6 +88,7 @@ int main() {
 
 	EnemySpawn spawner1 = generateSpawner(*maze, 1, rows, cols);
 	EnemySpawn spawner2 = generateSpawner(*maze, 0, rows, cols);
+	EnemySpawn spawner3 = generateSpawner(*maze, 2, rows, cols);
 
 	sCool = 0;
 
@@ -170,9 +171,11 @@ int main() {
 			//Decreases cooldowns
 			cool1 = -1;
 			cool2 = -1;
+			cool3 = -1;
 			//Creates the enemies
 			createEnemy(1, spawner1);
 			createEnemy(2, spawner2);
+			createEnemy(3, spawner3);
 			//Sets the direction of the enemies
 			move1 = 3;
 			move2 = 3;
@@ -236,6 +239,14 @@ int main() {
 				cool2--;
 			} else {
 				cool2--;
+			}
+
+			if (cool3 == 0) {
+				createEnemy(3, spawner3);
+				move3 = 3;
+				cool3--;
+			} else {
+				cool3--;
 			}
 
 			c = wgetch(menu_win);
@@ -335,13 +346,20 @@ int main() {
 				cool2 = ENEMCOOL;
 			}
 
-			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
+			if ((shot1X == enemy3X && shot1Y == enemy3Y) || (shot2X == enemy3X && shot2Y == enemy3Y)) {
+				score++;
+				enemy3X = -100;
+				enemy3Y = -100;
+				cool3 = ENEMCOOL;
+			}
+
+			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) || (playerX == enemy3X && playerY == enemy3Y) ) {
 				choice = 4;
-				printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2);
+				printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2, spawner3);
 	    		msleep(gamespeed);
 			}
 
-						if (enemy1X != -1) {
+			if (enemy1X != -1) {
 				move1 = enemyMove(maze, enemy1X, enemy1Y, move1);
 				switch (move1) {
 					case 0:
@@ -381,6 +399,26 @@ int main() {
 				}
 			}
 
+			if (enemy3X != -1) {
+				move3 = enemyMove(maze, enemy3X, enemy3Y, move3);
+				switch (move3) {
+					case 0:
+						enemy3Y--;
+						break;
+					case 1:
+						enemy3X--;
+						break;
+					case 2:
+						enemy3Y++;
+						break;
+					case 3:
+						enemy3X++;
+						break;
+					default:
+						break;
+				}
+			}
+
 			if ((shot1X == enemy1X && shot1Y == enemy1Y) || (shot2X == enemy1X && shot2Y == enemy1Y)) {
 				score++;
 				enemy1X = -100;
@@ -395,11 +433,18 @@ int main() {
 				cool2 = ENEMCOOL;
 			}
 
-			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) ) {
+			if ((shot1X == enemy3X && shot1Y == enemy3Y) || (shot2X == enemy3X && shot2Y == enemy3Y)) {
+				score++;
+				enemy3X = -100;
+				enemy3Y = -100;
+				cool3 = ENEMCOOL;
+			}
+
+			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) || (playerX == enemy3X && playerY == enemy3Y)) {
 				choice = 4;
 			}
 
-			printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2);
+			printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2, spawner3);
 	    	msleep(gamespeed);
 	  }
 	}
@@ -417,7 +462,7 @@ int main() {
 
 
 //Takes in a window (I'd call it a structure), which thing's highlighted, and q which keeps going up to prove that it will keep going when a key isn't pressed
-void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose, EnemySpawn spawner1, EnemySpawn spawner2) {
+void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BOARDX], int choose, EnemySpawn spawner1, EnemySpawn spawner2, EnemySpawn spawner3) {
 	//setup
 	//where to print it
 	//
@@ -430,7 +475,7 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 			//prints a row
 			for (int j = 0; j < BOARDX; j++) {
 				if (i == spawner1.y && j == spawner1.x) {
-				    if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X)) {
+				    if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X) || (i == enemy3Y && j == enemy3X)) {
 				    	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[M ");
 			        } else if (i == playerY && j == playerX) {
 			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[G ");
@@ -438,7 +483,15 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "[  ");
 			        }
 	      		} else if (i == spawner2.y && j == spawner2.x) {
-				    if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X)) {
+				    if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X) || (i == enemy3Y && j == enemy3X)) {
+				    	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " M]");
+			        } else if (i == playerY && j == playerX) {
+			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " G]");
+			        } else {
+			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", "  ]");
+			        }
+				} else if (i == spawner3.y && j == spawner3.x) {
+				    if((i == enemy1Y && j == enemy1X) || (i == enemy2Y && j == enemy2X) || (i == enemy3Y && j == enemy3X)) {
 				    	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " M]");
 			        } else if (i == playerY && j == playerX) {
 			        	mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " G]");
@@ -472,6 +525,9 @@ void printGameState(WINDOW *menu_win, int highlight, int q, int board[BOARDY][BO
 				    //prints monster
 				    mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " M ");
 				} else if(enemy2Y == i && enemy2X == j) {
+					//prints monster
+				    mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " M ");
+				} else if(enemy3Y == i && enemy3X == j) {
 					//prints monster
 				    mvwprintw(menu_win, i+OFFSETY, 3*j+OFFSETX, "%s", " M ");
 				} else if (board[i][j] == 1) {
@@ -677,9 +733,13 @@ EnemySpawn generateSpawner(int* maze, int left, int rows, int cols) {
 		spawner.x = 1;
 		spawner.y = rows-2;
 		return spawner;
-	} else {
+	} else if (left == 0) {
 		spawner.x = cols-2;
 		spawner.y = 1;
+		return spawner;
+	} else {
+		spawner.x = cols-2;
+		spawner.y = rows-2;
 		return spawner;
 	}
 }
@@ -689,9 +749,12 @@ void createEnemy(int enemy, EnemySpawn spawner) {
 	if (enemy == 1) {
 		enemy1X = spawner.x;
 		enemy1Y = spawner.y;
-	} else {
+	} else if (enemy == 2) {
 		enemy2X = spawner.x;
 		enemy2Y = spawner.y;
+	} else if (enemy == 3) {
+		enemy3X = spawner.x;
+		enemy3Y = spawner.y;
 	}
 }
 

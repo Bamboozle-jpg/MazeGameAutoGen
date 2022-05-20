@@ -44,7 +44,8 @@ typedef struct enemySpawn {
 char *choices[] = {
 	"Play Game      ",
 	"Change speed   ",
-	"Exit           ",
+	"Map Orient     ",
+	"Exit           "
 };
 //N choices is an integer representing the number of choices the player has
 int n_choices = sizeof(choices) / sizeof(char *);
@@ -62,6 +63,8 @@ void createEnemy(int enemy, EnemySpawn spawner);
 void print_menu(WINDOW *menu_win, int highlight);
 //Print the speed menu
 void print_menu_speed(WINDOW *menu_win);
+
+void print_menu_map(WINDOW *menu_win);
 
 int main() {
 
@@ -117,13 +120,13 @@ int main() {
 	refresh();
   	//Set up for future proof
   	int q = 1;
-	choice = 4;
+	choice = 5;
 
 	//menu
-	while(choice == 4) {
+	while(choice == 5) {
 		wclear(menu_win);
 		refresh();
-		choice = 4;
+		choice = 5;
 		while(1)
 		{	c = wgetch(menu_win);
 			switch(c)
@@ -207,10 +210,36 @@ int main() {
 					gamespeed = 500;
 				}
 			}
-			choice = 4;
+			choice = 5;
 		}
 
 		if (choice == 3) {
+			int close = 0;
+			while (close == 0) {
+				print_menu_map(menu_win);
+				c = wgetch(menu_win);
+				switch(c) {
+					case KEY_UP:
+						gamespeed += 10;
+						break;
+					case KEY_DOWN:
+						gamespeed -= 10;
+						break;
+					case 10:
+						close = 1;
+						break;
+				}
+				if (gamespeed < 10) {
+					gamespeed = 10;
+				}
+				if (gamespeed > 500) {
+					gamespeed = 500;
+				}
+			}
+			choice = 5;
+		}
+
+		if (choice == 4) {
 			clrtoeol();
 			//takes everything from printws and puts it on the screen
 			refresh();
@@ -354,7 +383,7 @@ int main() {
 			}
 
 			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) || (playerX == enemy3X && playerY == enemy3Y) ) {
-				choice = 4;
+				choice = 5;
 				printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2, spawner3);
 	    		msleep(gamespeed);
 			}
@@ -441,7 +470,7 @@ int main() {
 			}
 
 			if ( (playerX == enemy1X && playerY == enemy1Y) || (playerX == enemy2X && playerY == enemy2Y) || (playerX == enemy3X && playerY == enemy3Y)) {
-				choice = 4;
+				choice = 5;
 			}
 
 			printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2, spawner3);
@@ -790,11 +819,41 @@ void print_menu(WINDOW *menu_win, int highlight) {
 void print_menu_speed(WINDOW *menu_win) {
 	clear();
 	box(menu_win, 0, 0);
-	mvwprintw(menu_win, 7, 5, "Change the Game speed using the up and down arrows.", gamespeed);
-	mvwprintw(menu_win, 8, 5, "Default is 200. Higher is slower, lower is faster.");
+	mvwprintw(menu_win, 7, 5, "        Change the Game speed using the up and down arrows.", gamespeed);
+	mvwprintw(menu_win, 8, 5, "        Default is 200. Higher is slower, lower is faster.");
 	mvwprintw(menu_win, 9, 20, "              A");
 	mvwprintw(menu_win, 10, 20, "GAME SPEED : %d ", gamespeed);
 	mvwprintw(menu_win, 11, 20, "              V");
 	mvwprintw(menu_win, 12, 20, "                ");
+	wrefresh(menu_win);
+}
+
+void print_menu_map(WINDOW *menu_win) {
+	clear();
+	box(menu_win, 0, 0);
+	mvwprintw(menu_win, 2, 5, "          Change the Map orientation. (Ues arrow keys)      ", gamespeed);
+	mvwprintw(menu_win, 3, 4, "Make the hallways more likely to be up and down, or left and right.");
+	int change = 0;
+	switch (change) {
+		case 0 : 
+			mvwprintw(menu_win, 5, 38, "A");
+			mvwprintw(menu_win, 6, 38, "A");
+			mvwprintw(menu_win, 7, 38, "A");
+			mvwprintw(menu_win, 8, 38, "A");
+			mvwprintw(menu_win, 9, 38, "A");
+			mvwprintw(menu_win, 10, 38, "A");
+			mvwprintw(menu_win, 11, 38, "A");
+			mvwprintw(menu_win, 12, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			mvwprintw(menu_win, 13, 38, "A");
+			
+			break;
+	}
 	wrefresh(menu_win);
 }

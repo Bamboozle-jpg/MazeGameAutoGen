@@ -26,6 +26,11 @@
 // #define GAMESPEED 200
 #define ENEMCOOL 5
 
+typedef struct enemySpawn {
+	int x;
+	int y;
+} EnemySpawn;
+
 //enemy1/2,X/Y are coords of enemys, sCool, cool1, and cool2 are sword and enemy respawn cooldowns, choice is for menu, end is game end, shot1/2, X/Y are sword sprite locations, move1/2 are enemy AI
 int enemy1X, enemy1Y, playerX, playerY, move1, move2, move3, enemy2X, enemy2Y, enemy3X, enemy3Y, shot1X, shot1Y, shot2X, shot2Y, score, sCool, cool1, cool2, cool3, end, choice;
 char c;
@@ -33,13 +38,12 @@ char c;
 int startx = 0;
 int starty = 0;
 int gamespeed = 200;
-float horiSkew = 0.50;
+float skew = 0.50;
 int highlight = 1;
+EnemySpawn spawner1;
+EnemySpawn spawner2;
+EnemySpawn spawner3;
 
-typedef struct enemySpawn {
-	int x;
-	int y;
-} EnemySpawn;
 
 //Array for menu
 char *choices[] = {
@@ -67,6 +71,8 @@ void print_menu_speed(WINDOW *menu_win);
 
 void print_menu_map(WINDOW *menu_win);
 
+int* initalize_game(int rows, int cols);
+
 int main() {
 
   //Creates the Window
@@ -81,18 +87,14 @@ int main() {
 	int rows = BOARDY;
 	int cols = BOARDX;
 
-	int* mazeTemp = create_maze(rows, cols, horiSkew);
-	mazeTemp = break_walls(mazeTemp, 10, rows, cols);
+
+	int* mazeTemp = initalize_game(rows, cols);
 	int maze[rows][cols];
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			maze[i][j] = mazeTemp[i*cols + j];
 		}
 	}
-
-	EnemySpawn spawner1 = generateSpawner(*maze, 1, rows, cols);
-	EnemySpawn spawner2 = generateSpawner(*maze, 0, rows, cols);
-	EnemySpawn spawner3 = generateSpawner(*maze, 2, rows, cols);
 
 	sCool = 0;
 
@@ -159,12 +161,12 @@ int main() {
 		//Prepares game board for if they want to play/play again
 		if(choice == 1) {
 
-			//Re-randomizes maze
-			int* mazeTemp = create_maze(rows, cols, horiSkew);
-			mazeTemp = break_walls(mazeTemp, 20, rows, cols);
-			for (int i = 0; i < BOARDY; i++) {
-				for (int j = 0; j < BOARDX; j++) {
-					maze[i][j] = mazeTemp[i*BOARDY + j];
+			// initalizes game
+			int* mazeTemp = initalize_game(rows, cols);
+			int maze[rows][cols];
+			for (int i = 0; i < rows; i++) {
+				for (int j = 0; j < cols; j++) {
+					maze[i][j] = mazeTemp[i*cols + j];
 				}
 			}
 			//Setup for game
@@ -252,6 +254,8 @@ int main() {
 
 		//main game loop
 	  	while(choice == 1) {
+
+			
 			if (sCool > 0) {
 				sCool--;
 			}
@@ -858,4 +862,14 @@ void print_menu_map(WINDOW *menu_win) {
 			break;
 	}
 	wrefresh(menu_win);
+}
+
+int* initalize_game(int rows, int cols) {
+	int* maze = create_maze(rows, cols, skew);
+	maze = break_walls(maze, 10, rows, cols);
+	spawner1 = generateSpawner(maze, 1, rows, cols);
+	spawner2 = generateSpawner(maze, 0, rows, cols);
+	spawner3 = generateSpawner(maze, 2, rows, cols);
+
+	return maze;
 }

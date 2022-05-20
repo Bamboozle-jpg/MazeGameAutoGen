@@ -33,7 +33,7 @@ char c;
 int startx = 0;
 int starty = 0;
 int gamespeed = 200;
-float horiSkew = 0.50;
+float skew = 0.50;
 int highlight = 1;
 
 typedef struct enemySpawn {
@@ -65,7 +65,7 @@ void print_menu(WINDOW *menu_win, int highlight);
 //Print the speed menu
 void print_menu_speed(WINDOW *menu_win);
 
-void print_menu_map(WINDOW *menu_win);
+void print_menu_map(WINDOW *menu_win, int skewInd);
 
 int main() {
 
@@ -81,7 +81,7 @@ int main() {
 	int rows = BOARDY;
 	int cols = BOARDX;
 
-	int* mazeTemp = create_maze(rows, cols, horiSkew);
+	int* mazeTemp = create_maze(rows, cols, skew);
 	mazeTemp = break_walls(mazeTemp, 10, rows, cols);
 	int maze[rows][cols];
 	for (int i = 0; i < rows; i++) {
@@ -160,7 +160,7 @@ int main() {
 		if(choice == 1) {
 
 			//Re-randomizes maze
-			int* mazeTemp = create_maze(rows, cols, horiSkew);
+			int* mazeTemp = create_maze(rows, cols, skew);
 			mazeTemp = break_walls(mazeTemp, 20, rows, cols);
 			for (int i = 0; i < BOARDY; i++) {
 				for (int j = 0; j < BOARDX; j++) {
@@ -217,28 +217,41 @@ int main() {
 
 		if (choice == 3) {
 			int close = 0;
+			int choiceMap = 3;
 			while (close == 0) {
-				print_menu_map(menu_win);
+				print_menu_map(menu_win, choiceMap);
 				c = wgetch(menu_win);
 				switch(c) {
 					case KEY_UP:
-						gamespeed += 10;
-						break;
 					case KEY_DOWN:
-						gamespeed -= 10;
+						choiceMap += 1;
+						break;
+					case KEY_LEFT:
+					case KEY_RIGHT:
+						choiceMap -= 1;
 						break;
 					case 10:
 						close = 1;
 						break;
 				}
-				if (gamespeed < 10) {
-					gamespeed = 10;
+				if (choiceMap < 0) {
+					choiceMap = 0;
 				}
-				if (gamespeed > 500) {
-					gamespeed = 500;
+				if (choiceMap > 6) {
+					choiceMap = 6;
 				}
 			}
 			choice = 5;
+			float skews[7] = {
+				0.9,
+				0.75,
+				0.6,
+				0.5,
+				0.4,
+				0.25,
+				0.1
+			};
+			skew = skews[choiceMap];
 		}
 
 		if (choice == 4) {
@@ -819,7 +832,7 @@ void print_menu(WINDOW *menu_win, int highlight) {
 }
 
 void print_menu_speed(WINDOW *menu_win) {
-	clear();
+	wclear(menu_win);
 	box(menu_win, 0, 0);
 	mvwprintw(menu_win, 7, 5, "        Change the Game speed using the up and down arrows.", gamespeed);
 	mvwprintw(menu_win, 8, 5, "        Default is 200. Higher is faster, lower is lower.");
@@ -830,32 +843,42 @@ void print_menu_speed(WINDOW *menu_win) {
 	wrefresh(menu_win);
 }
 
-void print_menu_map(WINDOW *menu_win) {
-	clear();
+void print_menu_map(WINDOW *menu_win, int skewInd) {
+	wclear(menu_win);
+
 	box(menu_win, 0, 0);
 	mvwprintw(menu_win, 2, 5, "          Change the Map orientation. (Ues arrow keys)      ", gamespeed);
 	mvwprintw(menu_win, 3, 4, "Make the hallways more likely to be up and down, or left and right.");
-	int change = 0;
-	switch (change) {
+	mvwprintw(menu_win, 12 - skewInd, 38, "A");
+	for (int i = 0; i < skewInd; i++) {
+		mvwprintw(menu_win, 12 - i, 38, "|");
+	}
+	switch (skewInd) {
+		case 6 : 
+			mvwprintw(menu_win, 13, 37, "<+>");
+			break;
+		case 5 : 
+			mvwprintw(menu_win, 13, 35, "<--+-->");
+			break;
+		case 4 : 
+			mvwprintw(menu_win, 13, 33, "<----+---->");
+			break;
+		case 3 : 
+			mvwprintw(menu_win, 13, 31, "<------+------>");
+			break;
+		case 2 : 
+			mvwprintw(menu_win, 13, 29, "<--------+-------->");
+			break;
+		case 1 : 
+			mvwprintw(menu_win, 13, 27, "<----------+---------->");
+			break;
 		case 0 : 
-			mvwprintw(menu_win, 5, 38, "A");
-			mvwprintw(menu_win, 6, 38, "A");
-			mvwprintw(menu_win, 7, 38, "A");
-			mvwprintw(menu_win, 8, 38, "A");
-			mvwprintw(menu_win, 9, 38, "A");
-			mvwprintw(menu_win, 10, 38, "A");
-			mvwprintw(menu_win, 11, 38, "A");
-			mvwprintw(menu_win, 12, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-			mvwprintw(menu_win, 13, 38, "A");
-
+			mvwprintw(menu_win, 13, 25, "<------------+------------>");
 			break;
 	}
+	for (int i = 0; i < skewInd; i++) {
+		mvwprintw(menu_win, 14 + i, 38, "|");
+	}
+	mvwprintw(menu_win, 14 + skewInd, 38, "V");
 	wrefresh(menu_win);
 }

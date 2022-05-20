@@ -33,6 +33,7 @@ char c;
 int startx = 0;
 int starty = 0;
 int gamespeed = 200;
+float horiSkew = 0.50;
 int highlight = 1;
 
 typedef struct enemySpawn {
@@ -80,7 +81,7 @@ int main() {
 	int rows = BOARDY;
 	int cols = BOARDX;
 
-	int* mazeTemp = create_maze(rows, cols);
+	int* mazeTemp = create_maze(rows, cols, horiSkew);
 	mazeTemp = break_walls(mazeTemp, 10, rows, cols);
 	int maze[rows][cols];
 	for (int i = 0; i < rows; i++) {
@@ -159,7 +160,7 @@ int main() {
 		if(choice == 1) {
 
 			//Re-randomizes maze
-			int* mazeTemp = create_maze(rows, cols);
+			int* mazeTemp = create_maze(rows, cols, horiSkew);
 			mazeTemp = break_walls(mazeTemp, 20, rows, cols);
 			for (int i = 0; i < BOARDY; i++) {
 				for (int j = 0; j < BOARDX; j++) {
@@ -210,7 +211,8 @@ int main() {
 					gamespeed = 500;
 				}
 			}
-			choice = 5;
+			gamespeed = 510 - gamespeed;
+			choice = 4;
 		}
 
 		if (choice == 3) {
@@ -820,7 +822,7 @@ void print_menu_speed(WINDOW *menu_win) {
 	clear();
 	box(menu_win, 0, 0);
 	mvwprintw(menu_win, 7, 5, "        Change the Game speed using the up and down arrows.", gamespeed);
-	mvwprintw(menu_win, 8, 5, "        Default is 200. Higher is slower, lower is faster.");
+	mvwprintw(menu_win, 8, 5, "        Default is 200. Higher is faster, lower is lower.");
 	mvwprintw(menu_win, 9, 20, "              A");
 	mvwprintw(menu_win, 10, 20, "GAME SPEED : %d ", gamespeed);
 	mvwprintw(menu_win, 11, 20, "              V");
@@ -852,7 +854,7 @@ void print_menu_map(WINDOW *menu_win) {
 			mvwprintw(menu_win, 13, 38, "A");
 			mvwprintw(menu_win, 13, 38, "A");
 			mvwprintw(menu_win, 13, 38, "A");
-			
+
 			break;
 	}
 	wrefresh(menu_win);

@@ -208,6 +208,7 @@ int main() {
 					gamespeed = 500;
 				}
 			}
+			gamespeed = 510 - gamespeed;
 			choice = 4;
 		}
 
@@ -792,7 +793,7 @@ void print_menu_speed(WINDOW *menu_win) {
 	clear();
 	box(menu_win, 0, 0);
 	mvwprintw(menu_win, 7, 5, "Change the Game speed using the up and down arrows.", gamespeed);
-	mvwprintw(menu_win, 8, 5, "Default is 200. Higher is slower, lower is faster.");
+	mvwprintw(menu_win, 8, 5, "Default is 200. Higher is faster, lower is slower.");
 	mvwprintw(menu_win, 9, 20, "              A");
 	mvwprintw(menu_win, 10, 20, "GAME SPEED : %d ", gamespeed);
 	mvwprintw(menu_win, 11, 20, "              V");

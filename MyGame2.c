@@ -153,7 +153,7 @@ int main() {
 					break;
 			}
 			print_menu(menu_win, highlight);
-			if(choice == 1 || choice == 2 || choice == 3)	{/* User did a choice come out of the infinite loop */
+			if(choice == 1 || choice == 2 || choice == 3 || choice == 4)	{/* User did a choice come out of the infinite loop */
 				break;
 			}
 		}
@@ -163,7 +163,7 @@ int main() {
 
 			// initalizes game
 			int* mazeTemp = initalize_game(rows, cols);
-			int maze[rows][cols];
+			// int maze[rows][cols];
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
 					maze[i][j] = mazeTemp[i*cols + j];
@@ -214,12 +214,15 @@ int main() {
 				}
 			}
 			gamespeed = 510 - gamespeed;
-			choice = 4;
+			choice = 5;
 		}
 
 		if (choice == 3) {
 			int close = 0;
-			int choiceMap = 3;
+			int choiceMap;
+			if (skew == .5) {
+				choiceMap = 3;
+			}
 			while (close == 0) {
 				print_menu_map(menu_win, choiceMap);
 				c = wgetch(menu_win);
@@ -494,7 +497,7 @@ int main() {
 
 			printGameState(menu_win, highlight, q, maze, choice, spawner1, spawner2, spawner3);
 	    	msleep(gamespeed);
-	  }
+	  	}
 	}
 
 	//out of loop
@@ -851,7 +854,7 @@ void print_menu_map(WINDOW *menu_win, int skewInd) {
 	wclear(menu_win);
 
 	box(menu_win, 0, 0);
-	mvwprintw(menu_win, 2, 5, "          Change the Map orientation. (Ues arrow keys)      ", gamespeed);
+	mvwprintw(menu_win, 2, 5, "          Change the Map orientation. (Ues arrow keys)      ");
 	mvwprintw(menu_win, 3, 4, "Make the hallways more likely to be up and down, or left and right.");
 	mvwprintw(menu_win, 12 - skewInd, 38, "A");
 	for (int i = 0; i < skewInd; i++) {
